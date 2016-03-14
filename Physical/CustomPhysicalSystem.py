@@ -9,13 +9,13 @@ class InvPenDynamics(PhysicalSystem):
         self.B = B
 
     def update(self, h, clock, actuator_commands):
-        self.u = actuator_commands
+        self.u = actuator_commands['lqr']
         self.u = np.reshape(self.u, (-1, 1))
         x_dot = np.dot(self.A, self.x) + np.dot(self.B, self.u)
         self.x += h * x_dot
 
     def is_safe(self):
-        return self.x[2] <= 0.5 and self.x[2] >= -0.5
+        return -0.5 <= self.x[2] <= 0.5
 
 
 class VehicleABSDynamics(PhysicalSystem):
@@ -32,7 +32,7 @@ class VehicleABSDynamics(PhysicalSystem):
         self.road_friction_coeff = road_friction_coeff
 
     def update(self, h, clock, actuator_commands):
-
+        actuator_commands = actuator_commands['abs']
         g = 9.81
         v = self.x[0][0]
         w = self.x[1][0]

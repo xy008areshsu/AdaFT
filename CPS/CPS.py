@@ -1,7 +1,9 @@
 import pandas as pd
+from abc import ABCMeta, abstractmethod
+import numpy as np
 
 class CyberPhysicalSystem:
-    def __init__(self, physical_sys, cyber_sys, sensors, actuators, h = 0.002):
+    def __init__(self, physical_sys, cyber_sys, sensors, actuator, h = 0.001):
         """
 
         :param physical_sys:
@@ -14,34 +16,39 @@ class CyberPhysicalSystem:
         self.physical_sys = physical_sys
         self.cyber_sys = cyber_sys
         self.sensors = sensors
-        self.actuators = actuators
+        self.actuator = actuator
         self.h = h
         self.clock = 0
-        self.all_physical_states = physical_sys.states.copy()
 
 
+
+    @abstractmethod
     def should_stop(self):
-        raise NotImplementedError
+        """stop condition"""
 
 
     def step_update(self):
-        for k in self.sensors:
-            self.sensors[k].update(self.h, self.clock)
 
-        self.cyber_sys.update(self.h, self.clock)
+        sensor_inputs = {}
+        i = 0
+        for sensor in self.sensors:
+            z = sensor.sense(self.physical_sys.x)
+            name = 'sensor' + str(i)
+            sensor_inputs[name] = z[:, -1]
+            i += 1
 
-        for k in self.actuators:
-            self.actuators[k].update(self.h, self.clock)
+        self.cyber_sys.update(self.h, self.clock, sensor_inputs)
 
-        self.physical_sys.update(self.h, self.clock)
+        # for control_name, control_val in self.cyber_sys.control_inputs.items():
+        #     self.actuator[control_name] = self.actuator.actuator_commands(control_val)
+        self.actuator.update(self.cyber_sys.control_inputs)
 
-        self.clock += self.h
+        self.physical_sys.update(self.h, self.clock, self.actuator.actuator_commands)
+
 
 
     def run(self):
 
         while not self.should_stop():
             self.step_update()
-            new_state = self.physical_sys.states.copy()
-            new_state.index = [self.clock]
-            self.all_physical_states = self.all_physical_states.append(new_state)
+            self.clock += self.h

@@ -2,6 +2,7 @@ from Task.TaskModel import TaskModel
 from filterpy.kalman import KalmanFilter
 import numpy as np
 from Task.ParticleFilter import ParticleFilter, ABSParticleFilter
+import copy
 
 class ABS(TaskModel):
     def __init__(self, name, period, deadline, wcet, power, hydraulic_speed = 3300., upper_bound = 150., lower_bound = 100.):
@@ -90,12 +91,17 @@ class KalmanPredict(TaskModel):
 
     def run(self, inputs):
         """
-        :param inputs: dictionary of all sensor measurements
+        :param inputs: {'lqr':....., 'sensor': {dict of all sensor readings}}
         """
+        threshold = 75
+        inputs = inputs['sensor']
         self.kf.predict()
+        predicted = copy.deepcopy(self.kf.x)
         for sensor_name, z in inputs.items():
-            self.kf.update(z, self.Rs[sensor_name])
-
+            errors = abs(predicted - z)
+            if errors[2] < threshold:
+                self.kf.update(z, self.Rs[sensor_name])
+            # self.kf.update(z, self.Rs[sensor_name])
         self.output = self.kf.x
 
 class KalmanLQR(TaskModel):
@@ -140,13 +146,13 @@ class ABSPF(TaskModel):
     def run(self, inputs):
         """
         :param inputs: dictionary of all sensor measurements, and actuator commands
-               e.g. {'control' : 100,
+               e.g. {'abs' : 100,
                      'sensor' : {'sensor1' : np.array[30., 30., 10.]
                                  'sensor2' : np.array[32., 31., 10.]
                                  }
                      }
         """
-        self.pf.predict(inputs['control'])
+        self.pf.predict(inputs['abs'])
 
         self.pf.update(inputs['sensor'])
         if self.pf._neff() < self.pf.N / 2:

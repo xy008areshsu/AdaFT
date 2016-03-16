@@ -23,7 +23,7 @@ class Processor:
         self.rtos.update(h, clock)
         # self.control_inputs = self.rtos.task_outputs
         if self.rtos.running_task is None:
-            power = 1 # idle power 1 watt
+            power = 0.5 # idle power
         else:
             power = self.rtos.running_task.power
 

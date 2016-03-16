@@ -1,4 +1,5 @@
 import numpy as np
+from operator import attrgetter
 
 class CyberSystem:
     """
@@ -19,7 +20,7 @@ class CyberSystem:
 
     def update(self, h, clock, sensor_inputs):
         self.clock_sync(clock)
-
+        self.load_tuning()
         for processor in self.processors:
             for name in processor.rtos.task_list:
                 if name == 'filter':
@@ -35,6 +36,30 @@ class CyberSystem:
 
         self.update_control_inputs()
         self.voting()
+
+
+    def load_tuning(self):
+        idle_power = 0.5  # This is absurd, To Be Refactored!!!
+        x = np.reshape(self.processors[0].rtos.task_outputs['filter'], (-1, 1))
+        copy = 3
+        self.processors.sort(key=attrgetter('reliability_model.abs_temperature'))
+        for i in range(copy):
+            # List of processors need to run the tasks
+            for name in self.processors[i].rtos.task_list:
+                if name != 'filter': # filtering task always runs 3 copies, since it is the most important localizations
+                    self.processors[i].rtos.task_list[name].power = self.processors[i].rtos.task_profiles[name].power
+                    # self.processors[i].rtos.task_list[name].et = self.processors[i].rtos.task_profiles[name].et
+
+        for i in range(copy,len(self.processors)):
+            # List of processor need to get some rest
+            for name in self.processors[i].rtos.task_list:
+                if name != 'filter': # filtering task always runs 3 copies, since it is the most important localizations
+                    self.processors[i].rtos.task_list[name].power = idle_power
+                    # self.processors[i].rtos.task_list[name].et = 0.001
+                    # Don't change task et for now, since the voting algorithm would give wrong output,
+                    # this is fine since the normal condition is to run 3 copies of the task, and now using AdaFT power will be idle,
+                    # but the et will be unchanged, thus the schedulibility would not be affected.
+
 
 
     def clock_sync(self, clock):

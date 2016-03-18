@@ -15,6 +15,7 @@ class TaskModel:
         self.abs_deadline = 0
         self.start_time = 0
         self.output = 0
+        self.iterations = 0
 
     @abstractmethod
     def density(self):

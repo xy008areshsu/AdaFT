@@ -11,6 +11,7 @@ class RTOS:
         self.n = 0
         self.missed_task = {}
         self.task_profiles = {} # original task profiles, parameters determined at design time
+        self.task_iterations = {}
 
 
     def create_task(self, t):
@@ -19,6 +20,7 @@ class RTOS:
         self.task_list[t.name] = t
         self.task_outputs[t.name] = t.output
         self.task_profiles[t.name] = copy.deepcopy(t)
+        self.task_iterations[t.name] = t.iterations
 
 
     def schedule(self): # assume scheduler no overhead
@@ -83,6 +85,7 @@ class RTOS:
                 self.n += 1
                 new_t = copy.deepcopy(t)
                 new_t.abs_deadline = round(self.clock + new_t.deadline, 3)
+                new_t.iterations += 1
                 self.ready_queue.append(new_t)
                 new_t.run(self.task_inputs[new_t.name])
 
@@ -95,6 +98,7 @@ class RTOS:
         if self.running_task is not None:
             if round(self.clock - self.running_task.intermediate_time_ + self.running_task.finished_time, 3) >= round(self.running_task.et, 3):
                 self.task_outputs[self.running_task.name] = self.running_task.output
+                self.task_iterations[self.running_task.name] = self.running_task.iterations
                 self.task_list[self.running_task.name] = copy.deepcopy(self.running_task)  # don't forget to update the output in the task_list, in case some task uses its previous iteration's output as its current input.
                 self.task_list[self.running_task.name].finished_time = 0
                 self.running_task = None

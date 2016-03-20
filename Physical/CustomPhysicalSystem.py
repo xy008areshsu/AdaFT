@@ -18,6 +18,21 @@ class InvPenDynamics(PhysicalSystem):
         return -0.5 <= self.x[2] <= 0.5
 
 
+class Robot(PhysicalSystem):
+    def __init__(self, x0, A, B):
+        super().__init__(x0)
+        self.A = A
+        self.B = B
+
+    def update(self, h, clock, actuator_commands):
+        self.u = actuator_commands['lqr']
+        self.u = np.reshape(self.u, (-1, 1))
+        x_dot = np.dot(self.A, self.x) + np.dot(self.B, self.u)
+        self.x += h * x_dot
+
+    def is_safe(self):
+        return True
+
 class VehicleABSDynamics(PhysicalSystem):
     def __init__(self, x0, mass_quater_car = 250, mass_effective_wheel = 20, road_friction_coeff = 1.0):
         """

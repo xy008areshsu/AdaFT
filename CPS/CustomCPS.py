@@ -32,6 +32,36 @@ class InvPenCPS(CyberPhysicalSystem):
             x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
             self.xtract = np.append(self.xtract, x_predict, axis=1)
 
+class RobotCPS(CyberPhysicalSystem):
+    def __init__(self, physical_sys, cyber_sys, sensors, actuator, h = 0.001, end = 4):
+        super().__init__(physical_sys, cyber_sys, sensors, actuator, h)
+        self.end = end
+        self.taaf = np.zeros([(end + 2 * h) / h, 1])
+        self.taaf[0] = 1
+        self.temp = np.zeros([(end + 2 * h) / h, 1])
+        self.xs = np.zeros([6, (end + 2 * h) / h])
+        self.xs[:, 0] = self.physical_sys.x
+        self.xtract = np.zeros([6, (end + 2 * h) / h])
+        self.xtract[:, 0] = self.physical_sys.x
+
+
+
+    def should_stop(self):
+        return (self.clock >= self.end) or (not self.physical_sys.is_safe())
+
+
+    def run(self):
+        j = 0
+        while not self.should_stop():
+            self.step_update()
+            self.clock += self.h
+            self.taaf[j] = self.cyber_sys.processors[0].reliability_model.taaf
+            self.temp[j] = self.cyber_sys.processors[0].reliability_model.abs_temperature
+            self.xs[:, j] = self.physical_sys.x
+            x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
+            self.xtract[:, j] = x_predict
+            j += 1
+
 
 class ABSCPS(CyberPhysicalSystem):
     def __init__(self, physical_sys, cyber_sys, sensors, actuator, h = 0.001, end = 4):

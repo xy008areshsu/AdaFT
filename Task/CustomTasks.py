@@ -70,6 +70,18 @@ class LQRInvPen(TaskModel):
     def run(self, inputs):
         self.output = -np.dot(self.K, inputs)
 
+class LQRRobot(TaskModel):
+    def __init__(self, name, period, deadline, wcet, power, K):
+        super().__init__(name, period, deadline, wcet, power)
+        self.K = K
+        self.output = np.array([[0]])
+
+    def density(self):
+        return self.wcet
+
+    def run(self, inputs):
+        self.output = -np.dot(self.K, inputs)
+
 
 class KalmanPredict(TaskModel):
     """
@@ -103,6 +115,7 @@ class KalmanPredict(TaskModel):
                 self.kf.update(z, self.Rs[sensor_name])
             # self.kf.update(z, self.Rs[sensor_name])
         self.output = self.kf.x
+
 
 class KalmanLQR(TaskModel):
     """

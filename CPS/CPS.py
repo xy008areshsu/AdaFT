@@ -52,3 +52,4 @@ class CyberPhysicalSystem:
         while not self.should_stop():
             self.step_update()
             self.clock += self.h
+

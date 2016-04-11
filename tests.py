@@ -17,6 +17,7 @@ from Actuator.Actuator import Actuator
 from Actuator.CustomActuator import RobotActuator
 from Physical.CustomPhysicalSystem import InvPenDynamics, Robot
 from Cyber.CyberSystem import CyberSystem
+from Cyber.CustomCyberSystem import RobotCyberSystem
 from CPS.CustomCPS import InvPenCPS, ABSCPS, RobotCPS
 import copy
 
@@ -448,7 +449,7 @@ K = np.array([[1054.367, 426.901, 153.864, 365.784, 173.577, 67.28 ],
 
 
 
-x0 = np.array([-0.087,  0.087, -0.087, -0.087, -0.087, -0.087])
+# x0 = np.array([-0.087,  0.087, -0.087, -0.087, -0.087, -0.087])
 
 # y = odeint(right_hand_side, x0, t, args=(controller, numerical_constants))
 
@@ -461,7 +462,7 @@ kf_power = 6.5
 lqr_period = 0.02
 lqr_deadline = lqr_period
 lqr_wcet = 0.001
-lqr_power = 3.5
+lqr_power = 10
 
 actuator_noise = {'lqr' : 0}
 
@@ -501,7 +502,7 @@ Rs = {'sensor0' : R0, 'sensor1' : R1}
 
 F = 1 + kf_period * (A - np.dot(B, K))
 
-x0 = np.array([[-0.087],
+x0 = np.array([[-0.45],
                [0.087],
                [-0.087],
                [-0.087],
@@ -536,22 +537,25 @@ processor = Processor(rtos, reliability_model)
 processor2 = copy.deepcopy(processor)
 processor3 = copy.deepcopy(processor)
 
-cyber = CyberSystem([processor, processor2, processor3])
+cyber = RobotCyberSystem([processor, processor2, processor3])
 
-end = 5
+end = 3
 
-cps = InvPenCPS(robot, cyber, sensors, actuator, end=end)
+cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
 
 cps.run()
 
 print("Total number of tasks released: ", cps.cyber_sys.processors[0].rtos.n)
 print("Missed tasks: ", cps.cyber_sys.processors[0].rtos.missed_task)
 
-xtract = cps.xtract * 57.2958
-xs = cps.xs * 57.2958
+xtract = cps.xtract
+xs = cps.xs
 
 taaf = cps.taaf[cps.taaf != 0]
 temp = cps.temp[cps.temp != 0]
+
+copies = cps.copies
+version = cps.version
 
 # plt.figure()
 # plt.hold(True)
@@ -619,33 +623,62 @@ temp = cps.temp[cps.temp != 0]
 # plt.yticks(fontsize=18)
 # plt.legend(loc=4)
 #
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(xtract[0, :], c = 'm', label='Kalman Filter Theta 1', linewidth=3)
+plt.plot(xtract[1, :], c = 'c', label='Kalman Filter Theta 2', linewidth=3)
+plt.plot(xtract[2, :], c = 'black', label='Kalman Filter Theta 3', linewidth=3)
+plt.plot(xs[0, :], c = 'r', label='Theta 1', linewidth=1)
+plt.plot(xs[1, :], c = 'g', label='Theta 2', linewidth = 1)
+plt.plot(xs[2, :], c = 'b', label='Theta 3', linewidth = 1)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('Angle (rad)', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
+
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(xtract[3, :], c = 'm', label='Kalman Filter Rate 1', linewidth=3)
+plt.plot(xtract[4, :], c = 'c', label='Kalman Filter Rate 2', linewidth=3)
+plt.plot(xtract[5, :], c = 'black', label='Kalman Filter Rate 3', linewidth=3)
+plt.plot(xs[3, :], c = 'r', label='Rate 1', linewidth=1)
+plt.plot(xs[4, :], c = 'g', label='Rate 2', linewidth = 1)
+plt.plot(xs[5, :], c = 'b', label='Rate 3', linewidth = 1)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('Rate (rad)', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
+
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(copies[0, :], c = 'r', label='Copies', linewidth=2)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('Copies', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
+
 # plt.figure()
 # plt.hold(True)
 # plt.grid(True)
-# plt.plot(xs[0, :], c = 'r', label='Theta 1', linewidth=2)
-# plt.plot(xs[1, :], c = 'g', label='Theta 2', linewidth = 2)
-# plt.plot(xs[2, :], c = 'b', label='Theta 3', linewidth = 2)
+# plt.plot(version[0, :], c = 'r', label='version', linewidth=2)
 # plt.xlabel('Time (ms)', fontsize=18)
-# plt.ylabel('Angle (rad)', fontsize=18)
+# plt.ylabel('version', fontsize=18)
 # plt.xticks(fontsize=18)
 # plt.yticks(fontsize=18)
 # plt.legend(loc=4)
-#
-# plt.figure()
-# plt.hold(True)
-# plt.grid(True)
-# plt.plot(xs[3, :], c = 'r', label='Rate 1', linewidth=2)
-# plt.plot(xs[4, :], c = 'g', label='Rate 2', linewidth = 2)
-# plt.plot(xs[5, :], c = 'b', label='Rate 3', linewidth = 2)
-# plt.xlabel('Time (ms)', fontsize=18)
-# plt.ylabel('Rate (rad)', fontsize=18)
-# plt.xticks(fontsize=18)
-# plt.yticks(fontsize=18)
-# plt.legend(loc=4)
-#
-# f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-# ax1.plot(taaf)
-# ax1.set_title('taaf')
-# ax2.plot(temp)
-#
-# plt.show()
+
+f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
+ax1.plot(taaf)
+ax1.set_title('taaf')
+ax2.plot(temp)
+
+
+plt.show()
+
+

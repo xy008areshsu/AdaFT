@@ -1,5 +1,8 @@
 import numpy as np
 from operator import attrgetter
+from math import gcd
+from functools import reduce
+
 
 class CyberSystem:
     """
@@ -17,11 +20,15 @@ class CyberSystem:
         for name, val in self.control_inputs_candidates.items():
             self.control_inputs[name] = 0
         self.control_inputs_candidates_iterations = {}
+        all_task_periods = [int(1000 * self.processors[0].rtos.task_profiles[name].period) for name in self.processors[0].rtos.task_profiles if name != 'filter']
+        self.load_tuning_period = reduce(gcd, all_task_periods) / 1000
 
 
     def update(self, h, clock, sensor_inputs):
         self.clock_sync(clock)
-        self.load_tuning()
+        if round((self.clock ) * 1000, 0) % round((self.load_tuning_period * 1000), 0) == 0: # be careful to use round here to avoid precision errors
+            self.load_tuning(sensor_inputs)
+
         for processor in self.processors:
             for name in processor.rtos.task_list:
                 if name == 'filter':
@@ -39,7 +46,7 @@ class CyberSystem:
         self.voting()
 
 
-    def load_tuning(self):
+    def load_tuning(self, sensor_inputs):
         idle_power = 0.5  # This is absurd, To Be Refactored!!!
         x = np.reshape(self.processors[0].rtos.task_outputs['filter'], (-1, 1))
         copy = 1

@@ -82,6 +82,56 @@ class LQRRobot(TaskModel):
     def run(self, inputs):
         self.output = -np.dot(self.K, inputs)
 
+class LQRRobotU1(TaskModel):
+    def __init__(self, name, period, deadline, wcet, power, K):
+        super().__init__(name, period, deadline, wcet, power)
+        self.K = K
+        self.output = np.array([[0]])
+
+    def density(self):
+        return self.wcet
+
+    def run(self, inputs):
+        self.output = -np.dot(self.K, inputs)[0]
+
+class LQRRobotU2(TaskModel):
+    def __init__(self, name, period, deadline, wcet, power, K):
+        super().__init__(name, period, deadline, wcet, power)
+        self.K = K
+        self.output = np.array([[0]])
+
+    def density(self):
+        return self.wcet
+
+    def run(self, inputs):
+        self.output = -np.dot(self.K, inputs)[1]
+
+class LQRRobotU3(TaskModel):
+    def __init__(self, name, period, deadline, wcet, power, K):
+        super().__init__(name, period, deadline, wcet, power)
+        self.K = K
+        self.output = np.array([[0]])
+
+    def density(self):
+        return self.wcet
+
+    def run(self, inputs):
+        self.output = -np.dot(self.K, inputs)[2]
+
+class LQRRobotVersion2(TaskModel):
+    def __init__(self, name, period, deadline, wcet, power, K):
+        super().__init__(name, period, deadline, wcet, power)
+        self.K = K
+        self.u_bound = np.array([[80], [40], [30]])
+        self.output = np.array([[0]])
+
+    def density(self):
+        return self.wcet
+
+    def run(self, inputs):
+        self.output = -np.dot(self.K, inputs)
+        self.output = np.minimum(self.output, self.u_bound)
+
 
 class KalmanPredict(TaskModel):
     """

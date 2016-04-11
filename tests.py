@@ -539,7 +539,7 @@ processor3 = copy.deepcopy(processor)
 
 cyber = RobotCyberSystem([processor, processor2, processor3])
 
-end = 3
+end = 10
 
 cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
 

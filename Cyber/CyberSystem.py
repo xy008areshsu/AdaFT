@@ -93,62 +93,17 @@ class CyberSystem:
         elif np.all(val_list[0] - val_list[2] <= epsilon):
             return val_list[0]
         return val_list[1]
-        # out = {}
-        # majority = None
-        # out[majority] = 0
-        # for k, v in val_list.items():
-        #     if v not in out:
-        #         out[v] = 1
-        #     else:
-        #         out[v] += 1
-        #     if out[v] >= len(val_list) / 2.0:
-        #         return v
-        #     if out[v] > out[majority]:
-        #         majority = v
-        #
-        # return majority
+
 
     @staticmethod
     def double_vote(val_list, epsilon):
         if np.all((val_list[0] - val_list[1]) <= epsilon):
             return val_list[0]
         return np.zeros(len(val_list))
-        # vals = list(val_list)
-        # if vals[0] == vals[1]:
-        #     return vals[0]
-        # return 0
+
 
 
     def voting(self):
-        # for command in self.actuator_commands:
-        #     running = 0
-        #     finished = 0
-        #     for processor in self.processors:
-        #         if processor[command]['status'] == 'finished':
-        #             self.actuator_commands[command]['val_list'][processor] = processor[command]['val']
-        #             finished += 1
-        #         elif processor[command]['status'] == 'running':
-        #             running += 1
-        #
-        #     if running == 0 and finished != 0: # this means new iteration of this task is done for all copies
-        #         #first we turn all finished status to idle
-        #         for processor in self.processors:
-        #             if processor[command]['status'] == 'finished':
-        #                 processor[command]['status'] = 'idle'
-        #
-        #         # then we turn self.actuator_commands[command]['status'] to ready
-        #         self.actuator_commands[command]['status'] = 'ready'
-        #
-        #     if self.actuator_commands[command]['status'] == 'ready':
-        #         self.actuator_commands[command]['status'] = 'waiting'
-        #         if len(self.actuator_commands[command]['val_list']) == 3:
-        #             self.actuator_commands[command]['output'] = self.majority_vote(self.actuator_commands[command]['val_list'])
-        #         elif len(self.actuator_commands[command]['val_list']) == 2:
-        #             self.actuator_commands[command]['output'] = self.double_vote(self.actuator_commands[command]['val_list'])
-        #         else:
-        #             for p in self.actuator_commands[command]['val_list']:
-        #                 self.actuator_commands[command]['output'] = self.actuator_commands[command]['val_list'][p]
-
         for control_name, control_val_list in self.control_inputs_candidates.items():
             # only when iterations numbers are equal to each other, it means all copies of a task have finished for this iteration, then we use voting
             if all(x==self.control_inputs_candidates_iterations[control_name][0] for x in self.control_inputs_candidates_iterations[control_name]):

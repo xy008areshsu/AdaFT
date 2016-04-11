@@ -1,1 +1,0 @@
-specified = [ankle_torque, knee_torque, hip_torque]

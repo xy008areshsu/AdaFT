@@ -38,17 +38,12 @@ class CyberPhysicalSystem:
             i += 1
 
         self.cyber_sys.update(self.h, self.clock, sensor_inputs)
-
-        # for control_name, control_val in self.cyber_sys.control_inputs.items():
-        #     self.actuator[control_name] = self.actuator.actuator_commands(control_val)
         self.actuator.update(self.cyber_sys.control_inputs)
-
         self.physical_sys.update(self.h, self.clock, self.actuator.actuator_commands)
 
 
 
     def run(self):
-
         while not self.should_stop():
             self.step_update()
             self.clock += self.h

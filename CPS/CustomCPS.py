@@ -57,7 +57,7 @@ class RobotCPS(CyberPhysicalSystem):
         while not self.should_stop():
             self.step_update()
             self.clock += self.h
-            print(self.clock)
+            # print(self.clock)
             self.taaf[j] = self.cyber_sys.processors[0].reliability_model.taaf
             self.temp[j] = self.cyber_sys.processors[0].reliability_model.abs_temperature
             self.xs[:, j] = self.physical_sys.x[:, 0]

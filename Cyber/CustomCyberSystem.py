@@ -5,9 +5,9 @@ import pickle
 import os
 
 class RobotCyberSystem(CyberSystem):
-    def __init__(self, processors, clock = 0, clf_file = 'subspace_clf_robot.pkl'):
+    def __init__(self, processors, clock = 0, clf_file = 'subspace_clf_decision_tree.pkl'):
         super().__init__(processors, clock)
-        self.clf = pickle.load(open(os.path.join('D:/Dropbox/Phd/AdaFT/Cyber/', clf_file), 'rb'))
+        self.clf = pickle.load(open(os.path.join('./Cyber/', clf_file), 'rb'))
         self.copies = 3
         self.version = 1
 
@@ -19,22 +19,13 @@ class RobotCyberSystem(CyberSystem):
         x = x.reshape(1, -1)
         theta1 = x[0][0]
         rate1 = x[0][3]
-        copies = int(self.clf.predict(x) + 1)
-        # copies = 1Hell
+        copies = int(self.clf.predict(x) + 1) # clf from sklearn predicts class 1 as 0, class 2 as 1, and so on, so need to add 1 here
 
         power_version1 = self.processors[0].rtos.task_profiles['lqr'].power
         power_version2 = 1.0
         et_version1 = self.processors[0].rtos.task_profiles['lqr'].et
         et_version2 = 0.01
         QoC = 0.45
-        # if theta1 > QoC or theta1 < -QoC:
-        #     copies = 3
-        # elif (0.5 < theta1 < 0.65) or (-0.65 < theta1 < -0.5):
-        #     copies = 2
-        # else:
-        #     copies = 1
-
-        # copies = 3
         self.copies = copies
         self.processors.sort(key=attrgetter('reliability_model.abs_temperature'))
         for i in range(copies):

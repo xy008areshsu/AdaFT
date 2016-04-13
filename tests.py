@@ -10,7 +10,7 @@ from OS.RTOS import RTOS
 from Processor.Processor import Processor
 from Reliability.CustomReliabilityModel import TAAF
 from numpy.random import randn
-import book_plots as bp
+
 import Task.CustomTasks as ct
 from Sensor.CustomSensor import InvPenSensor, RobotSensor
 from Actuator.Actuator import Actuator
@@ -446,8 +446,9 @@ K = np.array([[1054.367, 426.901, 153.864, 365.784, 173.577, 67.28 ],
               [707.669, 610.181, 251.283, 263.836, 158.583, 72.18 ],
               [12.129,  43.669, 132.469,  11.613,  16.447,  19.12 ]])
 
-
-
+K1 = np.array([[ 929.79 ,  322.082,   73.883,  317.782,  142.912,   49.865],
+       [ 521.09 ,  431.75 ,   74.787,  188.568,  105.95 ,   38.039],
+       [ 277.   ,  239.326,  202.902,  108.11 ,   70.849,   42.213]])
 
 # x0 = np.array([-0.087,  0.087, -0.087, -0.087, -0.087, -0.087])
 
@@ -461,7 +462,7 @@ kf_power = 6.5
 
 lqr_period = 0.02
 lqr_deadline = lqr_period
-lqr_wcet = 0.001
+lqr_wcet = 0.004
 lqr_power = 10
 
 actuator_noise = {'lqr' : 0}
@@ -502,6 +503,7 @@ Rs = {'sensor0' : R0, 'sensor1' : R1}
 
 F = 1 + kf_period * (A - np.dot(B, K))
 
+
 x0 = np.array([[-0.45],
                [0.087],
                [-0.087],
@@ -526,6 +528,7 @@ sensors = [sensor, sensor1]
 kf = ct.makeLinearKF(A, B, C, P, F, x0[:, -1], 6, 6)
 localizer = KalmanPredict('filter', kf_period, kf_deadline, kf_wcet, kf_power, kf, Rs)
 lqr = LQRRobot('lqr', lqr_period, lqr_deadline, lqr_wcet, lqr_power, K)
+lqr1 = LQRRobot('lqr1', lqr_period, lqr_deadline, lqr_wcet, lqr_power/10, K1)
 
 queue = [localizer, lqr]
 rtos = RTOS()
@@ -539,7 +542,7 @@ processor3 = copy.deepcopy(processor)
 
 cyber = RobotCyberSystem([processor, processor2, processor3])
 
-end = 10
+end = 6
 
 cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
 

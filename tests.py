@@ -676,12 +676,35 @@ plt.legend(loc=4)
 # plt.yticks(fontsize=18)
 # plt.legend(loc=4)
 
-f, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 5))
-ax1.plot(taaf)
-ax1.set_title('taaf')
-ax2.plot(temp)
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(taaf, c = 'r', label='TAAF', linewidth=2)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('TAAF (1x)', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
+
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(temp, c = 'r', label='Temperature', linewidth=2)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('Temperature (K)', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
 
 
 plt.show()
+#
+# np.savetxt('./Data/HumanRobot/xtrack_v2_ada6.csv', xtract, delimiter=',')
+# np.savetxt('./Data/HumanRobot/xs_v2_ada6.csv', xs, delimiter=',')
+# np.savetxt('./Data/HumanRobot/copies_v2_ada6.csv', copies, delimiter=',')
+# np.savetxt('./Data/HumanRobot/temp_v2_ada6.csv', temp, delimiter=',')
+# np.savetxt('./Data/HumanRobot/taaf_v2_ada6.csv', taaf, delimiter=',')
+
+
 
 

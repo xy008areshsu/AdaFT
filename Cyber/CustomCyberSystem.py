@@ -43,9 +43,10 @@ class RobotCyberSystem(CyberSystem):
             theta1 = x[0][0]
             rate1 = x[0][3]
             copies = int(self.clf.predict(x) + 1) # clf from sklearn predicts class 1 as 0, class 2 as 1, and so on, so need to add 1 here
+            # copies = 3
 
             power_version1 = self.processors[0].rtos.task_profiles['lqr'].power
-            power_version2 = 1.0
+            power_version2 = 6.0
             et_version1 = self.processors[0].rtos.task_profiles['lqr'].et
             et_version2 = 0.001
             QoC = 0.15
@@ -75,11 +76,11 @@ class RobotCyberSystem(CyberSystem):
                     self.version = 1
                     self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
                 else:
-                    self.processors[i].rtos.task_list['lqr'].power = power_version1
-                    self.processors[i].rtos.task_list['lqr'].et = et_version1
-                    self.processors[i].rtos.task_list['lqr'].K = self.K1
+                    self.processors[i].rtos.task_list['lqr'].power = power_version2
+                    self.processors[i].rtos.task_list['lqr'].et = et_version2
+                    self.processors[i].rtos.task_list['lqr'].K = self.K2
                     self.version = 2
-                    self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
+                    self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K2))
 
 
             for i in range(copies,len(self.processors)):
@@ -97,6 +98,6 @@ class RobotCyberSystem(CyberSystem):
                     self.processors[i].rtos.task_list['lqr'].K = self.K1
                     self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
                 else:
-                    self.processors[i].rtos.task_list['lqr'].K = self.K1
-                    self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
+                    self.processors[i].rtos.task_list['lqr'].K = self.K2
+                    self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K2))
 

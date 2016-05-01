@@ -2,6 +2,7 @@ import numpy as np
 from operator import attrgetter
 from math import gcd
 from functools import reduce
+import copy
 
 
 class CyberSystem:
@@ -22,6 +23,13 @@ class CyberSystem:
         self.control_inputs_candidates_iterations = {}
         all_task_periods = [int(1000 * self.processors[0].rtos.task_profiles[name].period) for name in self.processors[0].rtos.task_profiles if name != 'filter']
         self.load_tuning_period = reduce(gcd, all_task_periods) / 1000
+
+    def create_task(self, t):
+        t.start_time = self.clock
+        self.task_list[t.name] = t
+        self.task_outputs[t.name] = t.output
+        self.task_profiles[t.name] = copy.deepcopy(t)
+        self.task_iterations[t.name] = t.iterations
 
 
     def update(self, h, clock, sensor_inputs):

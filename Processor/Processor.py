@@ -13,6 +13,7 @@ class Processor:
         self.rtos = rtos
         # self.failure_rate = failure_rate
         self.reliability_model = reliability_model
+        self.energy = 0
         # self.mttf = 1. / self.failure_rate
         # self.old_temperature = temperature
         # self.control_inputs = rtos.task_outputs
@@ -30,6 +31,7 @@ class Processor:
         Tss = self.reliability_model.steady_state_temperature(power)
         self.reliability_model.update_temperature(Tss, h)
         self.reliability_model.update_reliability()
+        self.energy += power * h
 
     def clock_sync(self, clock):
         self.clock = clock

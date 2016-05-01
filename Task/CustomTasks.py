@@ -77,7 +77,7 @@ class LQRRobot(TaskModel):
         self.output = np.array([[0]])
 
     def density(self):
-        return self.wcet
+        return self.wcet / 2
 
     def run(self, inputs):
         self.output = -np.dot(self.K, inputs)
@@ -126,7 +126,7 @@ class LQRRobotVersion2(TaskModel):
         self.output = np.array([[0]])
 
     def density(self):
-        return self.wcet
+        return self.wcet / 2
 
     def run(self, inputs):
         self.output = -np.dot(self.K, inputs)

@@ -38,6 +38,8 @@ class RobotCPS(CyberPhysicalSystem):
         self.end = end
         self.taaf = np.zeros([(end + 2 * h) / h, 1])
         self.taaf[0] = 1
+        self.mttf = np.zeros([(end + 2 * h) / h, 1])
+        self.mttf[0] = 10
         self.temp = np.zeros([(end + 2 * h) / h, 1])
         self.xs = np.zeros([6, (end + 2 * h) / h])
         self.xs[:, 0] = self.physical_sys.x[:, 0]
@@ -45,8 +47,8 @@ class RobotCPS(CyberPhysicalSystem):
         self.xtract[:, 0] = self.physical_sys.x[:, 0]
         self.copies = np.zeros([1, (end + 2 * h) / h])
         self.version = np.zeros([1, (end + 2 * h) / h])
-
-
+        self.energy = np.zeros([(end + 2 * h) / h, 1])
+        self.energy[0] = 0
 
     def should_stop(self):
         return (self.clock >= self.end) or (not self.physical_sys.is_safe())
@@ -59,6 +61,8 @@ class RobotCPS(CyberPhysicalSystem):
             self.clock += self.h
             # print(self.clock)
             self.taaf[j] = self.cyber_sys.processors[0].reliability_model.taaf
+            self.energy[j] = self.cyber_sys.processors[0].energy
+            self.mttf[j] = self.cyber_sys.processors[0].reliability_model.mttf_in_years
             self.temp[j] = self.cyber_sys.processors[0].reliability_model.abs_temperature
             self.xs[:, j] = self.physical_sys.x[:, 0]
             x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))

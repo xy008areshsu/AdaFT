@@ -25,6 +25,10 @@ from Sensor.CustomSensor import ABSSensor
 # from Actuator.CustomActuator import ABSActuator, NoABSActuator
 from Physical.CustomPhysicalSystem import VehicleABSDynamics
 from Task.ParticleFilter import ABSParticleFilter, ParticleFilter
+import pickle
+import os
+import random
+import time
 
 # ### Inverted Pendulum test  ###
 # h = 0.001
@@ -263,8 +267,8 @@ from Task.ParticleFilter import ABSParticleFilter, ParticleFilter
 # # ax2.set_title('mttf in years')
 #
 # plt.show()
-
-
+#
+#
 # ######### Car ABS  #########
 #
 # ### Define parameters
@@ -273,7 +277,7 @@ from Task.ParticleFilter import ABSParticleFilter, ParticleFilter
 # xs = x0
 # mass_quater_car = 250
 # mass_effective_wheel = 20
-# road_friction_coeff = 1.
+# road_friction_coeff = 0.8
 #
 # actuator_noise = {'abs' : 0}
 # sensor_vehicle_speed_noise = 0.5 # don't use a very small value, which will lead to poor particle filter performance
@@ -390,7 +394,7 @@ from Task.ParticleFilter import ABSParticleFilter, ParticleFilter
 # plt.grid(True)
 # plt.plot(xs[2, :], c = 'b', label='distance', linewidth=2)
 # plt.xlabel('Time (ms)')
-# plt.ylabel('Stop Dis (m)')
+# plt.ylabel('Distance (m)')
 # plt.legend(loc=4)
 #
 # # plt.figure()
@@ -408,8 +412,8 @@ from Task.ParticleFilter import ABSParticleFilter, ParticleFilter
 # ax2.set_title('mttf in years')
 #
 # plt.show()
-
-# np.savetxt('temp009.csv', temp, delimiter=',')
+#
+# # np.savetxt('temp009.csv', temp, delimiter=',')
 
 
 ############ Humanoid Robot ########
@@ -462,7 +466,7 @@ kf_power = 6.5
 
 lqr_period = 0.02
 lqr_deadline = lqr_period
-lqr_wcet = 0.004
+lqr_wcet = 0.008
 lqr_power = 10
 
 actuator_noise = {'lqr' : 0}
@@ -539,14 +543,146 @@ reliability_model = TAAF(fail_rate)
 processor = Processor(rtos, reliability_model)
 processor2 = copy.deepcopy(processor)
 processor3 = copy.deepcopy(processor)
+processor4 = copy.deepcopy(processor)
+processor5 = copy.deepcopy(processor)
+processor6 = copy.deepcopy(processor)
+processor7 = copy.deepcopy(processor)
+processor8 = copy.deepcopy(processor)
+processor9 = copy.deepcopy(processor)
+processor10 = copy.deepcopy(processor)
 
-cyber = RobotCyberSystem([processor, processor2, processor3])
+processor_list = [copy.deepcopy(processor) for i in range(3)]
 
-end = 6
+cyber = RobotCyberSystem(processor_list)
 
-cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+# cyber = RobotCyberSystem([processor, processor2, processor3, processor4])
 
-cps.run()
+end = 5
+
+# cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+#
+# cps.run()
+
+for i in range(1):
+    # x0 = np.array([[random.uniform(-1.0, 1.0)],
+    #            [random.uniform(-0.1, 0.1)],
+    #            [random.uniform(-0.1, 0.1)],
+    #            [random.uniform(-0.1, 0.1)],
+    #            [random.uniform(-0.1, 0.1)],
+    #            [random.uniform(-0.1, 0.1)]])
+
+    x1 = np.array([[-0.45],
+                   [0.087],
+                   [-0.087],
+                   [-0.087],
+                   [-0.087],
+                   [-0.087]])
+
+    # version2_power_list = [1., 3., 5., 7., 9.]
+    # version2_wcet_list = [0.001, 0.002, 0.003, 0.004, 0.005]
+    # num_processors_list = [3, 4, 5, 6]
+    # QoC_list = [0.15, 0.35, 0.55, 0.75]
+
+    version2_power_list = [6.]
+    version2_wcet_list = [0.002]
+    num_processors_list = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25]
+    QoC_list = [0.15]
+
+    dict_list = []
+    count = 0
+
+    for version2_power in version2_power_list:
+        for version2_wcet in version2_wcet_list:
+            for version2_et in np.arange(0.001,version2_wcet + 0.001,0.001):
+                for num_processors in num_processors_list:
+                    for QoC in QoC_list:
+
+                        x0 = copy.deepcopy(x1)
+                        robot = Robot(x0, A, B)
+                        processor_list = [copy.deepcopy(processor) for i in range(num_processors)]
+                        cyber = RobotCyberSystem(processor_list)
+                        cyber.power_version2 = version2_power
+                        cyber.wcet_version2 = version2_wcet
+                        cyber.et_version2 = version2_et
+                        cyber.QoC = QoC
+                        cyber.adaft_on = False
+                        cyber.dvfs_on = False
+                        cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+                        cps.run()
+                        mttf = cps.mttf[cps.mttf != 0]
+                        mttf_all_on = np.mean(mttf)
+                        energy_all_on = cps.energy[cps.energy != 0]
+                        energy_all_on_final = energy_all_on[-1]
+
+
+                        x0 = copy.deepcopy(x1)
+                        robot = Robot(x0, A, B)
+                        processor_list = [copy.deepcopy(processor) for i in range(num_processors)]
+                        cyber = RobotCyberSystem(processor_list)
+                        cyber.power_version2 = version2_power
+                        cyber.wcet_version2 = version2_wcet
+                        cyber.et_version2 = version2_et
+                        cyber.QoC = QoC
+                        cyber.adaft_on = False
+                        cyber.dvfs_on = True
+                        cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+                        cps.run()
+                        mttf = cps.mttf[cps.mttf != 0]
+                        mttf_dvfs = np.mean(mttf)
+                        energy_dvfs = cps.energy[cps.energy != 0]
+                        energy_dvfs_final = energy_dvfs[-1]
+
+
+                        x0 = copy.deepcopy(x1)
+                        robot = Robot(x0, A, B)
+                        processor_list = [copy.deepcopy(processor) for i in range(num_processors)]
+                        cyber = RobotCyberSystem(processor_list)
+                        cyber.power_version2 = version2_power
+                        cyber.wcet_version2 = version2_wcet
+                        cyber.et_version2 = version2_et
+                        cyber.QoC = QoC
+                        cyber.adaft_on = True
+                        cyber.dvfs_on = True
+                        cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+                        cps.run()
+                        mttf = cps.mttf[cps.mttf != 0]
+                        mttf_adaft_dvfs = np.mean(mttf)
+                        energy_adaft_dvfs = cps.energy[cps.energy != 0]
+                        energy_adaft_dvfs_final = energy_adaft_dvfs[-1]
+
+
+                        x0 = copy.deepcopy(x1)
+                        robot = Robot(x0, A, B)
+                        processor_list = [copy.deepcopy(processor) for i in range(num_processors)]
+                        cyber = RobotCyberSystem(processor_list)
+                        cyber.power_version2 = version2_power
+                        cyber.wcet_version2 = version2_wcet
+                        cyber.et_version2 = version2_et
+                        cyber.QoC = QoC
+                        cyber.adaft_on = True
+                        cyber.dvfs_on = False
+                        cps = RobotCPS(robot, cyber, sensors, actuator, end=end)
+                        cps.run()
+                        mttf = cps.mttf[cps.mttf != 0]
+                        mttf_adaft = np.mean(mttf)
+                        energy_adaft = cps.energy[cps.energy != 0]
+                        energy_adaft_final = energy_adaft[-1]
+
+
+                        one_dict = {'Version 1 Power': 10, 'Version 1 Execution Time' : 0.004, 'Version 1 WCET': 0.008, 'Version 2 Power': version2_power,
+                                    'Version 2 Execution Time' : version2_et, 'Version 2 WCET': version2_wcet, 'Number of Processors': num_processors,
+                                    'QoC Constraint': QoC, 'MTTF All On': mttf_all_on, 'MTTF AdaFT': mttf_adaft, 'MTTF DVFS': mttf_dvfs, 'MTTF AdaFT DVFS': mttf_adaft_dvfs,
+                                    'Energy All On' : energy_all_on_final, 'Energy AdaFT' : energy_adaft_final, 'Energy DVFS' : energy_dvfs_final, 'Energy AdaFT DVFS' : energy_adaft_dvfs_final}
+                        dict_list.append(one_dict)
+                        print(one_dict)
+                        print(count)
+                        count += 1
+                        # print('MTTF:', np.mean(mttf))
+                        # pickle.dump(cps.cyber_sys.QLearning, open(os.path.join('./Cyber/', 'QLearningRobot_general.pkl'), 'wb'))
+                        # time.sleep(2)
+
+    df = pd.DataFrame(dict_list)
+    df.to_csv('./Data/HumanRobot/hardware_provisioning.csv')
 
 print("Total number of tasks released: ", cps.cyber_sys.processors[0].rtos.n)
 print("Missed tasks: ", cps.cyber_sys.processors[0].rtos.missed_task)
@@ -556,6 +692,11 @@ xs = cps.xs
 
 taaf = cps.taaf[cps.taaf != 0]
 temp = cps.temp[cps.temp != 0]
+mttf = cps.mttf[cps.mttf != 0]
+
+print('MTTF:', np.mean(mttf))
+print('lqr power:', cps.cyber_sys.processors[0].rtos.task_list['lqr'].power)
+print('kf power:', cps.cyber_sys.processors[0].rtos.task_list['filter'].power)
 
 copies = cps.copies
 version = cps.version
@@ -697,13 +838,38 @@ plt.yticks(fontsize=18)
 plt.legend(loc=4)
 
 
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(mttf, c = 'r', label='MTTF', linewidth=2)
+plt.xlabel('Time (ms)', fontsize=18)
+plt.ylabel('MTTF (Years)', fontsize=18)
+plt.xticks(fontsize=18)
+plt.yticks(fontsize=18)
+plt.legend(loc=4)
+
+plt.figure()
+plt.hold(True)
+plt.grid(True)
+plt.plot(energy_all_on, '-m', label='All On', linewidth=4, )
+plt.plot(energy_adaft, '-c', label='AdaFT', linewidth=4, )
+plt.plot(energy_dvfs, '-b', label='DVFS', linewidth=2, )
+plt.plot(energy_adaft_dvfs, '-r', label='AdaFT DVFS', linewidth=2, )
+plt.xlabel('Time (ms)', fontsize=30)
+plt.ylabel('Energy (joule)', fontsize=30)
+plt.xticks(fontsize=30)
+plt.yticks(fontsize=30)
+plt.legend(loc=4, fontsize=30)
+
 plt.show()
-#
-# np.savetxt('./Data/HumanRobot/xtrack_v2_ada6.csv', xtract, delimiter=',')
-# np.savetxt('./Data/HumanRobot/xs_v2_ada6.csv', xs, delimiter=',')
-# np.savetxt('./Data/HumanRobot/copies_v2_ada6.csv', copies, delimiter=',')
-# np.savetxt('./Data/HumanRobot/temp_v2_ada6.csv', temp, delimiter=',')
-# np.savetxt('./Data/HumanRobot/taaf_v2_ada6.csv', taaf, delimiter=',')
+
+
+
+# np.savetxt('./Data/HumanRobot/xtrack_vmix_ada_rf1.csv', xtract, delimiter=',')
+# np.savetxt('./Data/HumanRobot/xs_vmix_ada_rf1.csv', xs, delimiter=',')
+# np.savetxt('./Data/HumanRobot/copies_vmix_ada_rf1.csv', copies, delimiter=',')
+# np.savetxt('./Data/HumanRobot/temp_vmix_ada_rf1.csv', temp, delimiter=',')
+# np.savetxt('./Data/HumanRobot/taaf_vmix_ada_rf1.csv', taaf, delimiter=',')
 
 
 

@@ -79,7 +79,6 @@ class RTOS:
         return 0
 
     def release_new_task_iterations(self):
-        import math
         for name, t in self.task_list.items():
             if round((self.clock - t.start_time) * 1000, 0) % round((t.period * 1000), 0) == 0: # be careful to use round here to avoid precision errors
                 self.n += 1
@@ -109,6 +108,7 @@ class RTOS:
 
     def update(self, h, clock):
         self.clock_sync(clock)
-        self.release_new_task_iterations()
+        #### For previous implementations, remove the below comment ####
+        # self.release_new_task_iterations()
         self.check_running_task()
         self.schedule()

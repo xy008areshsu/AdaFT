@@ -13,6 +13,11 @@ class InvPenSensor(Sensor):
                          [x[2][0] + randn() * self.noise_scale[2]],
                          [x[3][0] + randn() * self.noise_scale[3]]])
 
+        # return np.array([[x[0][0] + np.random.uniform(-3*self.noise_scale[0], 3*self.noise_scale[0])],
+        #                  [x[1][0] + np.random.uniform(-3*self.noise_scale[1], 3*self.noise_scale[1])],
+        #                  [x[2][0] + np.random.uniform(-3*self.noise_scale[2], 3*self.noise_scale[2])],
+        #                  [x[3][0] + np.random.uniform(-3*self.noise_scale[3], 3*self.noise_scale[3])]])
+
 class RobotSensor(Sensor):
     def sense(self, x):
         if len(x) != 6:

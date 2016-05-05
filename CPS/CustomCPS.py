@@ -29,8 +29,13 @@ class InvPenCPS(CyberPhysicalSystem):
             self.temp[j] = self.cyber_sys.processors[0].reliability_model.abs_temperature
             j += 1
             self.xs = np.append(self.xs, self.physical_sys.x, axis=1)
-            x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
-            self.xtract = np.append(self.xtract, x_predict, axis=1)
+            # x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
+            x_predict = np.reshape(self.cyber_sys.control_inputs['filter'], (-1, 1))
+            if x_predict.shape[0] == 1:
+                self.xtract = np.append(self.xtract, self.physical_sys.x, axis=1)
+            else:
+                self.xtract = np.append(self.xtract, x_predict, axis=1)
+
 
 class RobotCPS(CyberPhysicalSystem):
     def __init__(self, physical_sys, cyber_sys, sensors, actuator, h = 0.001, end = 4):
@@ -43,6 +48,7 @@ class RobotCPS(CyberPhysicalSystem):
         self.temp = np.zeros([(end + 2 * h) / h, 1])
         self.xs = np.zeros([6, (end + 2 * h) / h])
         self.xs[:, 0] = self.physical_sys.x[:, 0]
+        self.u = np.zeros([3, (end + 2 * h) / h])
         self.xtract = np.zeros([6, (end + 2 * h) / h])
         self.xtract[:, 0] = self.physical_sys.x[:, 0]
         self.copies = np.zeros([1, (end + 2 * h) / h])
@@ -65,10 +71,15 @@ class RobotCPS(CyberPhysicalSystem):
             self.mttf[j] = self.cyber_sys.processors[0].reliability_model.mttf_in_years
             self.temp[j] = self.cyber_sys.processors[0].reliability_model.abs_temperature
             self.xs[:, j] = self.physical_sys.x[:, 0]
-            x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
-            self.xtract[:, j] = x_predict[:,0]
+            self.u[:, j] = self.physical_sys.u[:, 0]
+            if type(self.cyber_sys.control_inputs['filter']) == int:
+                self.xtract[:, j] = np.array([0, 0, 0, 0, 0, 0])
+            else:
+                x_predict = np.reshape(self.cyber_sys.control_inputs['filter'], (-1, 1))
+                self.xtract[:, j] = x_predict[:,0]
+            # x_predict = np.reshape(self.cyber_sys.processors[0].rtos.task_outputs['filter'], (-1, 1))
+            # self.xtract[:, j] = x_predict[:, 0]
             self.copies[:, j] = self.cyber_sys.copies
-            self.version[:, j] = self.cyber_sys.version
             j += 1
 
 

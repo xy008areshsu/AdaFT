@@ -80,6 +80,8 @@ class LQRRobot(TaskModel):
         return self.wcet / 2
 
     def run(self, inputs):
+        if inputs.shape[0] == 1:
+            inputs = np.array([[0], [0], [0], [0], [0], [0]])
         self.output = -np.dot(self.K, inputs)
 
 class LQRRobotU1(TaskModel):
@@ -92,6 +94,8 @@ class LQRRobotU1(TaskModel):
         return self.wcet
 
     def run(self, inputs):
+        if inputs.shape[0] == 1:
+            inputs = np.array([[0], [0], [0], [0], [0], [0]])
         self.output = -np.dot(self.K, inputs)[0]
 
 class LQRRobotU2(TaskModel):
@@ -104,6 +108,8 @@ class LQRRobotU2(TaskModel):
         return self.wcet
 
     def run(self, inputs):
+        if inputs.shape[0] == 1:
+            inputs = np.array([[0], [0], [0], [0], [0], [0]])
         self.output = -np.dot(self.K, inputs)[1]
 
 class LQRRobotU3(TaskModel):
@@ -116,6 +122,8 @@ class LQRRobotU3(TaskModel):
         return self.wcet
 
     def run(self, inputs):
+        if inputs.shape[0] == 1:
+            inputs = np.array([[0], [0], [0], [0], [0], [0]])
         self.output = -np.dot(self.K, inputs)[2]
 
 class LQRRobotVersion2(TaskModel):

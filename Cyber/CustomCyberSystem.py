@@ -284,7 +284,7 @@ class RobotCyberSystem(CyberSystem):
             if theta1 > QoC or theta1 < -QoC:
                 self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
             else:
-                self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K2))
+                self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
             self.processors[i].rtos.task_list['filter'].power = self.processors[i].rtos.task_profiles[
                 'filter'].power
             self.processors[i].rtos.task_list['filter'].et = self.processors[i].rtos.task_profiles['filter'].et
@@ -298,7 +298,7 @@ class RobotCyberSystem(CyberSystem):
             if theta1 > QoC or theta1 < -QoC:
                 self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
             else:
-                self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K2))
+                self.processors[i].rtos.task_list['filter'].kf.F = 1 + kf_period * (self.A - np.dot(self.B, self.K1))
 
         #schedule the remaining tasks
         for i in range(copies):

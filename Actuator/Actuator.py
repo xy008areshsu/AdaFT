@@ -13,5 +13,6 @@ class Actuator:
         :return: real actuator commands
         """
         for name, val in control_inputs.items():
-            self.actuator_commands[name] = val + randn() * self.noise_scale[name]
+            if name != 'filter':
+                self.actuator_commands[name] = val + randn() * self.noise_scale[name]
 
